@@ -222,16 +222,9 @@ th, td {
 }
 th { background: var(--accent-soft); }
 
-code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
-code { background: var(--accent-soft); padding: .1em .35em; border-radius: 4px; font-size: .92em; }
-pre {
-  background: var(--code-bg);
-  color: var(--code-fg);
-  padding: 1rem 1.15rem;
-  border-radius: var(--radius);
-  overflow-x: auto;
-}
-pre code { background: none; padding: 0; color: inherit; }
+/* 行首列是表格的行标题（<th scope="row">），不跟着表头一起上色，
+   否则一列橙色会把正文压得看不出层级 */
+tbody th { background: none; font-weight: 600; }
 
 /* 筛选控件（js/filter.js 会用） */
 .filters {
