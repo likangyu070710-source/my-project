@@ -38,7 +38,12 @@ html[data-theme="dark"] {
 *::before,
 *::after { box-sizing: border-box; }   /* border-box：宽度含 padding 与边框 */
 
-html { scroll-behavior: smooth; }
+/* scroll-padding-top：顶栏是 sticky 的，锚点落到标题上时要把这段高度让出来，
+   否则标题会滑到顶栏背后被完全挡住 */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-offset);
+}
 
 body {
   margin: 0;
@@ -342,10 +347,26 @@ tbody th { background: none; font-weight: 600; }
 
 /* ---- 6. 响应式细节 ---- */
 @media (max-width: 40rem) {
-  .site-header .wrap { padding-block: .6rem; }
+  /* 手机上顶栏压成两行：品牌 + 主题按钮一行，导航独占一行。
+     不改的话 brand / nav / 按钮会折成三行，sticky 顶栏会吃掉 1/5 屏高 */
+  :root { --header-offset: 7rem; }
+
+  .site-header .wrap {
+    padding-block: .6rem;
+    gap: .35rem .6rem;
+  }
+  .brand { order: 1; }
+  .theme-toggle { order: 2; }
+  .site-nav { order: 3; flex-basis: 100%; }
   .site-nav ul { gap: .2rem; }
   .site-nav a { padding: .35rem .5rem; font-size: .88rem; }
   .toc { position: static; }
+}
+
+/* 320px 这类最窄的机器上，导航四个词会自己折成两行，把顶栏又撑高一层。
+   只收紧左右内边距（字号不动）就够放下四个词，顶栏因此稳定在两行 */
+@media (max-width: 24rem) {
+  .site-nav a { padding: .3rem .3rem; }
 }
 
 /* 尊重"减少动态效果"的系统设置 */
@@ -354,8 +375,21 @@ tbody th { background: none; font-weight: 600; }
   * { transition: none !important; animation: none !important; }
 }
 
-/* 打印：把导航、页脚、侧栏去掉 */
+/* 打印：把导航、页脚、侧栏去掉，并强制浅色纸墨。
+   只覆盖变量、不碰组件规则 —— 深色模式下按打印也不会印出一张黑纸 */
 @media print {
+  :root,
+  html[data-theme="dark"] {
+    --paper: #fff;
+    --ink: #000;
+    --line: #bbb;
+    --card: #fff;
+    --accent: #c2410c;      /* 打印固定用浅色模式那支深橙，两种主题出来一致 */
+    --accent-soft: #f4f4f4;
+    --on-accent: #fff;
+  }
+  /* 浏览器默认不印背景色：白字配强调色底会印成"白底白字"看不见，
+     所以强制把这几块底色一起印出来 */
+  html { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .site-header, .site-footer, .toc, .filters, .theme-toggle, .skip { display: none; }
-  body { background: #fff; color: #000; }
 }
