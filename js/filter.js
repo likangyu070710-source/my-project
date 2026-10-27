@@ -1,7 +1,7 @@
-/* filter.js — 校园地点筛选
-   页面：campus.html
-   原理：每个条目带 data-cat，点按钮时按分类显示/隐藏，并实时播报结果数量。
-   纯前端，不需要服务器（课程明确要求）。 */
+/* filter.js — filtering the campus places
+   Used on campus.html.
+   Each card carries data-cat; the buttons show and hide by category and the
+   result count is announced live. Client-side only — no server involved. */
 
 (function () {
   "use strict";
@@ -36,14 +36,15 @@
           : "Showing " + shown + noun + " in " + labelOf(cat);
       }
 
-      /* 把当前分类写回地址栏：刷新、前进后退或把地址发给同学时，
-         都能回到同一个筛选结果。用 replaceState，不留一串历史记录 */
+      /* Write the current category back into the address bar, so a refresh, a
+         back button or a shared link returns the same view. replaceState keeps
+         it out of the history stack. */
       try {
         var url = new URL(window.location.href);
         if (cat === "all") { url.searchParams.delete("cat"); }
         else { url.searchParams.set("cat", cat); }
         window.history.replaceState(null, "", url);
-      } catch (e) { /* file:// 下 replaceState 会被拦，忽略即可 */ }
+      } catch (e) { /* replaceState is blocked on file:// — ignore */ }
     }
 
     function labelOf(cat) {
@@ -57,14 +58,14 @@
       apply(btn.getAttribute("data-filter"));
     });
 
-    /* 支持用 URL 参数直接定位，例如 campus.html?cat=food */
+    /* A URL parameter can open a category directly, e.g. campus.html?cat=food */
     var initial = "all";
     try {
       var p = new URLSearchParams(window.location.search).get("cat");
       if (p && buttons.some(function (b) { return b.getAttribute("data-filter") === p; })) {
         initial = p;
       }
-    } catch (e) { /* 忽略 */ }
+    } catch (e) { /* ignore */ }
 
     apply(initial);
   }

@@ -1,10 +1,10 @@
 /* ==========================================================================
-   新生在儋州怎么活下来 — 样式表
-   单一样式表，四个页面共用（Lesson 3：Use external. Almost always.）
-   组织顺序：变量 → 基础 → 布局 → 组件 → 页面 → 响应式
+   How to Survive Danzhou — stylesheet
+   One stylesheet shared by all four pages: external, never inline or internal.
+   Order: variables → base → layout → components → page-specific → responsive
    ========================================================================== */
 
-/* ---- 1. 变量（统一在这里换色，全站跟着变） ---- */
+/* ---- 1. Variables — change a colour here and the whole site follows ---- */
 :root {
   --paper: #fbfaf7;
   --ink: #12141a;
@@ -13,14 +13,14 @@
   --accent: #c2410c;
   --accent-soft: #fdf0e8;
   --card: #ffffff;
-  /* 橙色底上的文字：浅色模式的橙够深，配白字；深色模式见下一块 */
+  /* Text on the accent: the light-mode orange is dark enough for white text; dark mode is handled below */
   --on-accent: #ffffff;
   --max: 68rem;
   --radius: 10px;
-  --header-offset: 5rem;   /* 粘性顶栏的实际高度，锚点跳转时用来让开它 */
+  --header-offset: 5rem;   /* real height of the sticky header — anchor jumps clear it by this much */
 }
 
-/* 深色模式：由 js/theme.js 在 <html> 上加 data-theme="dark" 触发 */
+/* Dark mode: js/theme.js sets data-theme="dark" on <html> */
 html[data-theme="dark"] {
   --paper: #14161c;
   --ink: #ecebe7;
@@ -29,17 +29,17 @@ html[data-theme="dark"] {
   --accent: #fb8f5c;
   --accent-soft: #241c17;
   --card: #1b1e25;
-  /* 深色模式的橙偏亮，白字只有 2.3:1，看不清；换成深字是 7.9:1 */
+  /* The dark-mode orange is lighter: white on it is only 2.3:1, dark text reaches 7.9:1 */
   --on-accent: #14161c;
 }
 
-/* ---- 2. 基础 ---- */
+/* ---- 2. Base ---- */
 *,
 *::before,
-*::after { box-sizing: border-box; }   /* border-box：宽度含 padding 与边框 */
+*::after { box-sizing: border-box; }   /* border-box: width includes padding and border */
 
-/* scroll-padding-top：顶栏是 sticky 的，锚点落到标题上时要把这段高度让出来，
-   否则标题会滑到顶栏背后被完全挡住 */
+/* scroll-padding-top: the header is sticky, so an anchored heading has to clear
+   it — otherwise the heading lands behind the header and is completely hidden */
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--header-offset);
@@ -52,7 +52,7 @@ body {
   /* latin-first stack: this site is written in English, so no CJK face should win */
   font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, system-ui, sans-serif;
-  /* these are inherited properties — set once on body (Lesson 3: text flows down) */
+  /* Inherited properties — set once on body and they flow down */
 }
 
 img { max-width: 100%; height: auto; display: block; }
@@ -67,7 +67,7 @@ h3 { font-size: 1.15rem; margin: 1.8em 0 .4em; }
 
 p, li { max-width: 42em; }
 
-/* 键盘可访问性：跳到主内容 */
+/* Keyboard access: skip straight to the main content */
 .skip {
   position: absolute;
   left: -9999px;
@@ -80,7 +80,7 @@ p, li { max-width: 42em; }
 }
 .skip:focus { left: 0; }
 
-/* ---- 3. 布局 ---- */
+/* ---- 3. Layout ---- */
 .wrap {
   width: min(100% - 2.5rem, var(--max));
   margin-inline: auto;
@@ -106,7 +106,7 @@ p, li { max-width: 42em; }
   letter-spacing: -0.02em;
   text-decoration: none;
   color: var(--ink);
-  margin-right: auto;      /* 把导航推到右边 */
+  margin-right: auto;      /* pushes the navigation to the right */
 }
 .brand span { color: var(--accent); }
 
@@ -138,7 +138,7 @@ main { padding-block: 2.5rem 4rem; }
   font-size: .92rem;
 }
 
-/* 版权与出处：比页脚正文再小一号，但保持可读 */
+/* Credits and sources: one step smaller than the footer text, but still readable */
 .fineprint {
   font-size: .82rem;
   line-height: 1.65;
@@ -147,7 +147,7 @@ main { padding-block: 2.5rem 4rem; }
   max-width: 52em;
 }
 
-/* 两栏：主内容 + 侧栏 */
+/* Two columns: main content + sidebar */
 .with-aside {
   display: grid;
   gap: 2.5rem;
@@ -157,7 +157,7 @@ main { padding-block: 2.5rem 4rem; }
   .with-aside { grid-template-columns: minmax(0, 1fr) 17rem; }
 }
 
-/* 卡片网格：自适应，手机上自动一列（响应式要求） */
+/* Card grid: auto-fitting, collapsing to one column on a phone */
 .grid {
   display: grid;
   gap: 1rem;
@@ -165,7 +165,7 @@ main { padding-block: 2.5rem 4rem; }
   margin: 1.5rem 0;
 }
 
-/* ---- 4. 组件 ---- */
+/* ---- 4. Components ---- */
 .hero {
   padding-block: clamp(2rem, 7vw, 4.5rem);
   border-bottom: 1px solid var(--line);
@@ -216,11 +216,11 @@ th, td {
 }
 th { background: var(--accent-soft); }
 
-/* 行首列是表格的行标题（<th scope="row">），不跟着表头一起上色，
-   否则一列橙色会把正文压得看不出层级 */
+/* The leading column holds row headers (<th scope="row">), so it does not take
+   the header colour — a whole orange column would flatten the hierarchy */
 tbody th { background: none; font-weight: 600; }
 
-/* 筛选控件（js/filter.js 会用） */
+/* Filter controls — driven by js/filter.js */
 .filters {
   display: flex;
   gap: .5rem;
@@ -246,7 +246,7 @@ tbody th { background: none; font-weight: 600; }
 
 .filter-status { color: var(--dim); font-size: .92rem; margin: 0 0 1rem; }
 
-/* 照片：图 + 说明。说明用 .credit 单独一行写来源 */
+/* Photograph: image + caption. The source goes on its own .credit line */
 .photo { margin: 2rem 0; }
 .photo img {
   width: 100%;
@@ -261,7 +261,7 @@ tbody th { background: none; font-weight: 600; }
 }
 .photo .credit { display: block; font-size: .82rem; }
 
-/* 两张并排，窄屏自动叠成一列 */
+/* Two side by side, stacking on narrow screens */
 .photo-pair {
   display: grid;
   gap: 1rem;
@@ -270,7 +270,7 @@ tbody th { background: none; font-weight: 600; }
 }
 .photo-pair .photo { margin: 0; }
 
-/* 主题切换按钮 */
+/* Theme toggle button */
 .theme-toggle {
   font: inherit;
   font-size: .95rem;
@@ -283,7 +283,7 @@ tbody th { background: none; font-weight: 600; }
 }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ---- 5. 页面专属 ---- */
+/* ---- 5. Page-specific ---- */
 .toc {
   background: var(--card);
   border: 1px solid var(--line);
@@ -331,10 +331,11 @@ tbody th { background: none; font-weight: 600; }
   font-size: 1.1em;
 }
 
-/* ---- 6. 响应式细节 ---- */
+/* ---- 6. Responsive details ---- */
 @media (max-width: 40rem) {
-  /* 手机上顶栏压成两行：品牌 + 主题按钮一行，导航独占一行。
-     不改的话 brand / nav / 按钮会折成三行，sticky 顶栏会吃掉 1/5 屏高 */
+  /* On a phone the header becomes two rows: brand + theme button, then the nav.
+     Without this, brand / nav / button wrap to three rows and the sticky header
+     eats a fifth of the screen */
   :root { --header-offset: 7rem; }
 
   .site-header .wrap {
@@ -349,20 +350,22 @@ tbody th { background: none; font-weight: 600; }
   .toc { position: static; }
 }
 
-/* 320px 这类最窄的机器上，导航四个词会自己折成两行，把顶栏又撑高一层。
-   只收紧左右内边距（字号不动）就够放下四个词，顶栏因此稳定在两行 */
+/* On a 320px screen the four nav words wrap to a second line and push the header
+   up again. Tightening the side padding — not the font size — fits them, so the
+   header stays at two rows */
 @media (max-width: 24rem) {
   .site-nav a { padding: .3rem .3rem; }
 }
 
-/* 尊重"减少动态效果"的系统设置 */
+/* Respect the system "reduce motion" setting */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; animation: none !important; }
 }
 
-/* 打印：把导航、页脚、侧栏去掉，并强制浅色纸墨。
-   只覆盖变量、不碰组件规则 —— 深色模式下按打印也不会印出一张黑纸 */
+/* Print: drop the nav, footer and sidebar, and force light ink on paper.
+   Only the variables are overridden — printing in dark mode must not produce a
+   black page */
 @media print {
   :root,
   html[data-theme="dark"] {
@@ -370,12 +373,12 @@ tbody th { background: none; font-weight: 600; }
     --ink: #000;
     --line: #bbb;
     --card: #fff;
-    --accent: #c2410c;      /* 打印固定用浅色模式那支深橙，两种主题出来一致 */
+    --accent: #c2410c;      /* print always uses the light-mode orange, so both themes print the same */
     --accent-soft: #f4f4f4;
     --on-accent: #fff;
   }
-  /* 浏览器默认不印背景色：白字配强调色底会印成"白底白字"看不见，
-     所以强制把这几块底色一起印出来 */
+  /* Browsers do not print backgrounds by default: white text on the accent would
+     come out invisible, so force these fills to print as well */
   html { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .site-header, .site-footer, .toc, .filters, .theme-toggle, .skip { display: none; }
 }
