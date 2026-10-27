@@ -35,6 +35,15 @@
           ? "Showing all " + shown + " places"
           : "Showing " + shown + noun + " in " + labelOf(cat);
       }
+
+      /* 把当前分类写回地址栏：刷新、前进后退或把地址发给同学时，
+         都能回到同一个筛选结果。用 replaceState，不留一串历史记录 */
+      try {
+        var url = new URL(window.location.href);
+        if (cat === "all") { url.searchParams.delete("cat"); }
+        else { url.searchParams.set("cat", cat); }
+        window.history.replaceState(null, "", url);
+      } catch (e) { /* file:// 下 replaceState 会被拦，忽略即可 */ }
     }
 
     function labelOf(cat) {
