@@ -13,10 +13,11 @@
   --accent: #c2410c;
   --accent-soft: #fdf0e8;
   --card: #ffffff;
-  --code-bg: #1c1f26;
-  --code-fg: #e8e6e1;
+  /* 橙色底上的文字：浅色模式的橙够深，配白字；深色模式见下一块 */
+  --on-accent: #ffffff;
   --max: 68rem;
   --radius: 10px;
+  --header-offset: 5rem;   /* 粘性顶栏的实际高度，锚点跳转时用来让开它 */
 }
 
 /* 深色模式：由 js/theme.js 在 <html> 上加 data-theme="dark" 触发 */
@@ -28,6 +29,8 @@ html[data-theme="dark"] {
   --accent: #fb8f5c;
   --accent-soft: #241c17;
   --card: #1b1e25;
+  /* 深色模式的橙偏亮，白字只有 2.3:1，看不清；换成深字是 7.9:1 */
+  --on-accent: #14161c;
 }
 
 /* ---- 2. 基础 ---- */
@@ -65,7 +68,7 @@ p, li { max-width: 42em; }
   left: -9999px;
   top: 0;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   padding: .7rem 1.1rem;
   z-index: 99;
   border-radius: 0 0 var(--radius) 0;
@@ -119,7 +122,7 @@ p, li { max-width: 42em; }
   font-size: .95rem;
 }
 .site-nav a:hover { background: var(--accent-soft); color: var(--accent); }
-.site-nav a[aria-current="page"] { background: var(--accent); color: #fff; }
+.site-nav a[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
 
 main { padding-block: 2.5rem 4rem; }
 
@@ -197,7 +200,7 @@ main { padding-block: 2.5rem 4rem; }
 .btn {
   display: inline-block;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   text-decoration: none;
   padding: .7rem 1.15rem;
   border-radius: var(--radius);
@@ -247,7 +250,7 @@ tbody th { background: none; font-weight: 600; }
 .filters button[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .filter-status { color: var(--dim); font-size: .92rem; margin: 0 0 1rem; }
@@ -321,7 +324,7 @@ tbody th { background: none; font-weight: 600; }
   display: grid;
   place-items: center;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-radius: 50%;
   font-weight: 700;
   font-size: .95rem;
