@@ -30,7 +30,10 @@
     function label() {
       var dark = root.getAttribute("data-theme") === "dark";
       btn.textContent = dark ? "☀ Light" : "☾ Dark";
-      btn.setAttribute("aria-pressed", dark ? "true" : "false");
+      /* 这里不用 aria-pressed：可见文字本来就在"Dark / Light"之间变，
+         再配一个 aria-pressed 会让读屏念出"Light，已按下"这种自相矛盾的状态。
+         改成把按钮名写成"点了会发生什么"，读屏听到的就是一个明确的操作 */
+      btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
     }
 
     btn.addEventListener("click", function () {
