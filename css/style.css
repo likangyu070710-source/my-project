@@ -17,7 +17,13 @@
   --on-accent: #ffffff;
   --max: 68rem;
   --radius: 10px;
-  --header-offset: 5rem;   /* real height of the sticky header — anchor jumps clear it by this much */
+  --header-offset: 5rem;   /* real height of the sticky header — anchor jumps clear it by this much;
+                              overridden at runtime by js/header.js, which measures the real height */
+  --head-pad: .8rem;       /* the header's padding-block; the search panel's top is derived from it */
+  --search-w: 15rem;       /* 240px inline search field */
+  --search-h: 2.5625rem;   /* 41px = the theme button's rendered height */
+  --search-panel-w: 22rem; /* 352px results panel */
+  --row-hover: var(--accent-soft);
 }
 
 /* Dark mode: js/theme.js sets data-theme="dark" on <html> */
@@ -31,6 +37,9 @@ html[data-theme="dark"] {
   --card: #1b1e25;
   /* The dark-mode orange is lighter: white on it is only 2.3:1, dark text reaches 7.9:1 */
   --on-accent: #14161c;
+  /* accent-soft is 1.005:1 against --card here, so a hovered or highlighted
+     row must use --line instead — see the search panel below */
+  --row-hover: var(--line);
 }
 
 /* ---- 2. Base ---- */
@@ -80,6 +89,23 @@ p, li { max-width: 42em; }
 }
 .skip:focus { left: 0; }
 
+/* One focus ring for the whole site. The browser's default blue is nearly
+   invisible against the dark paper, so it is replaced here once; nothing
+   else on the site may set outline:none. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Text for the screen reader only: kept in the layout as one clipped pixel,
+   not display:none, so it is still announced. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---- 3. Layout ---- */
 .wrap {
   width: min(100% - 2.5rem, var(--max));
@@ -98,7 +124,7 @@ p, li { max-width: 42em; }
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  padding-block: .8rem;
+  padding-block: var(--head-pad);
 }
 
 .brand {
@@ -283,6 +309,229 @@ tbody th { background: none; font-weight: 600; }
 }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
+/* ---- 4b. Site search ---------------------------------------------------
+   A header field that indexes the four pages in the browser at runtime.
+   Three layouts, and in every one the header keeps exactly the height it
+   had before the search was opened — the expanded field never participates
+   in the row the header's height is taken from. */
+
+.search { position: relative; }
+.search [hidden] { display: none !important; }
+
+.search__toggle {
+  display: none;               /* desktop shows the field, not the button */
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--dim);
+  cursor: pointer;
+}
+.search__toggle:hover { border-color: var(--accent); color: var(--accent); }
+.search__toggle .search__cross { display: none; }
+.search__toggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.search__toggle[aria-expanded="true"] .search__glass { display: none; }
+.search__toggle[aria-expanded="true"] .search__cross { display: block; }
+
+.search__box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 var(--search-w);
+}
+.search__icon {
+  position: absolute;
+  left: .72rem;
+  width: 16px;
+  height: 16px;
+  color: var(--dim);
+  pointer-events: none;
+}
+.search__input {
+  width: 100%;
+  height: var(--search-h);
+  padding: 0 .7rem 0 2.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: .95rem;
+  line-height: 1;
+}
+.search__input::placeholder { color: var(--dim); opacity: 1; }  /* Firefox dims it by default */
+.search__input:focus {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.search__clear {
+  position: absolute;
+  right: .4rem;
+  height: 100%;
+  padding: 0 .4rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: .82rem;
+  color: var(--dim);
+  cursor: pointer;
+}
+.search__clear:hover { color: var(--ink); }
+.search__box.has-value .search__input { padding-right: 2.6rem; }
+
+.search__panel {
+  position: absolute;
+  top: calc(100% + var(--head-pad) + 1px);
+  left: 0;
+  width: var(--search-panel-w);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 32px -24px rgb(0 0 0 / .45);
+  z-index: 20;
+  max-height: min(26rem, 70vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.s-meta {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .75rem;
+  margin: 0;
+  padding: .45rem 1rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  font-size: .82rem;
+  color: var(--dim);
+}
+.s-keys { font-size: .82rem; color: var(--dim); }
+
+.s-list { list-style: none; margin: 0; padding: 0; }
+
+.s-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: .72rem 1rem;
+  cursor: pointer;
+}
+.s-row + .s-row { border-top: 1px solid var(--line); }
+.s-row:hover { background: var(--row-hover); }
+.s-row:hover .s-title { color: var(--accent); }
+.s-row.is-active { background: var(--row-hover); outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.s-page {
+  display: block;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.s-title {
+  display: block;
+  font-size: .95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.s-snippet {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: .92rem;
+  line-height: 1.5;
+  color: var(--dim);
+  overflow-wrap: anywhere;
+}
+
+mark {
+  background: var(--accent-soft);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  border-radius: 2px;
+  padding: 0 .1em;
+}
+html[data-theme="dark"] mark { background: var(--line); }
+
+.s-empty { padding: 1.35rem 1rem; }
+.s-empty strong { display: block; font-size: .95rem; font-weight: 600; color: var(--ink); }
+.s-empty span { display: block; margin-top: .25rem; font-size: .92rem; color: var(--dim); }
+.s-retry {
+  margin-top: .5rem;
+  font: inherit;
+  font-size: .88rem;
+  padding: .35rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--accent);
+  cursor: pointer;
+}
+.s-retry:hover { border-color: var(--accent); }
+
+/* Below 60rem the field collapses into the button, so a 60rem-wide header
+   does not have to grow a third row. The field's own position changes per
+   band — absolute over the nav row on a phone, in-flow on a mid-sized
+   window — but the header height never moves (see js/search.js). */
+@media (max-width: 60rem) {
+  .search__toggle { display: inline-flex; }
+  .search__box { display: none; }
+  .search__panel { max-height: min(50svh, 22rem); }
+}
+
+/* Mid-sized window: the field replaces the brand and nav in the one row,
+   and the toggle stays put as the close control. */
+@media (min-width: 40.0625rem) and (max-width: 60rem) {
+  .search[data-open] { display: flex; align-items: center; gap: .5rem; flex: 1 1 auto; max-width: 26rem; margin-right: auto; }
+  .search[data-open] .search__box { position: static; display: flex; flex: 1 1 auto; }
+  .site-header[data-search-open] .brand,
+  .site-header[data-search-open] .site-nav { display: none; }
+}
+
+/* Phone: the field covers the nav row (nav keeps its slot via visibility),
+   and both the field and the panel anchor to the header, not to the button. */
+@media (max-width: 40rem) {
+  .search { position: static; }
+  .search__panel {
+    top: calc(100% + 1px);
+    left: 1.25rem;
+    right: 1.25rem;
+    width: auto;
+  }
+  .search[data-open] .search__box {
+    display: flex;
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    bottom: var(--head-pad);
+  }
+  .search[data-open] .search__box .search__input { height: 2.75rem; font-size: 1rem; }
+  .search[data-open] ~ .site-nav { visibility: hidden; }
+}
+
+/* 641–736px is the tight band: the 44px button plus its gap leaves the
+   nav only ~24px of slack, so the nav links lose a little side padding. */
+@media (min-width: 40.0625rem) and (max-width: 46rem) {
+  .site-header .wrap { gap: .5rem; }
+  .site-nav a { padding-inline: .5rem; }
+}
+
 /* ---- 5. Page-specific ---- */
 .toc {
   background: var(--card);
@@ -290,7 +539,7 @@ tbody th { background: none; font-weight: 600; }
   border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
   position: sticky;
-  top: 5rem;
+  top: var(--header-offset);
   align-self: start;
   font-size: .95rem;
 }
@@ -333,18 +582,19 @@ tbody th { background: none; font-weight: 600; }
 
 /* ---- 6. Responsive details ---- */
 @media (max-width: 40rem) {
-  /* On a phone the header becomes two rows: brand + theme button, then the nav.
-     Without this, brand / nav / button wrap to three rows and the sticky header
-     eats a fifth of the screen */
-  :root { --header-offset: 7rem; }
+  /* On a phone the header becomes two rows: brand + search + theme button,
+     then the nav. Without this, the pieces wrap to three rows and the
+     sticky header eats a fifth of the screen */
+  :root { --header-offset: 7rem; --head-pad: .6rem; }
 
   .site-header .wrap {
-    padding-block: .6rem;
+    padding-block: var(--head-pad);
     gap: .35rem .6rem;
   }
   .brand { order: 1; }
-  .theme-toggle { order: 2; }
-  .site-nav { order: 3; flex-basis: 100%; }
+  .search { order: 2; }
+  .theme-toggle { order: 3; }
+  .site-nav { order: 4; flex-basis: 100%; }
   .site-nav ul { gap: .2rem; }
   .site-nav a { padding: .35rem .5rem; font-size: .88rem; }
   .toc { position: static; }
@@ -355,6 +605,20 @@ tbody th { background: none; font-weight: 600; }
    header stays at two rows */
 @media (max-width: 24rem) {
   .site-nav a { padding: .3rem .3rem; }
+  /* The theme button drops its word and keeps only the moon/sun. The icon
+     comes from a pseudo-element keyed to data-theme on <html>, so theme.js
+     needs no change; the accessible name is still its aria-label. */
+  .theme-toggle {
+    font-size: 0;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .theme-toggle::before { content: "☾"; font-size: 1rem; }
+  html[data-theme="dark"] .theme-toggle::before { content: "☀"; }
 }
 
 /* Respect the system "reduce motion" setting */
@@ -380,5 +644,5 @@ tbody th { background: none; font-weight: 600; }
   /* Browsers do not print backgrounds by default: white text on the accent would
      come out invisible, so force these fills to print as well */
   html { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  .site-header, .site-footer, .toc, .filters, .theme-toggle, .skip { display: none; }
+  .site-header, .site-footer, .toc, .filters, .theme-toggle, .search, .skip { display: none; }
 }
