@@ -115,6 +115,44 @@
       <p>For anything official — what to bring, what to pay, when to register — the offer letter and the university's own notices are what count. Where a section is only my opinion, I have said so. Where prices or opening times can change, check them on the day.</p>
     </section>
 
+    <section aria-labelledby="machine" hidden data-machine-section>
+      <h2 id="machine">The useless machine</h2>
+      <p>Every guide needs one thing that does nothing. This is mine: ask it a question and it will consider that question at length, then answer it badly. It costs nothing to run, because there is no server behind it — the whole machine is the page you are already reading.</p>
+
+      <div class="machine" data-machine data-state="idle">
+        <div class="machine__screen">
+          <div>
+            <p class="machine__label">Question</p>
+            <p class="machine__q" data-mq>Ready.</p>
+            <p class="machine__status" data-ms>Standing by.</p>
+          </div>
+          <div class="machine__gauge" aria-hidden="true">
+            <svg viewBox="0 0 200 120">
+              <path class="machine__track" d="M22 104 A78 78 0 0 1 178 104"></path>
+              <line class="machine__needle" x1="100" y1="104" x2="100" y2="35"></line>
+              <circle class="machine__pin" cx="100" cy="104" r="5"></circle>
+            </svg>
+            <p class="machine__gauge-label">Certainty</p>
+          </div>
+        </div>
+
+        <div class="machine__controls">
+          <label class="sr-only" for="machine-q">Type a question for the machine</label>
+          <input id="machine-q" class="machine__input" type="text" placeholder="Type a question…" autocomplete="off" spellcheck="false" maxlength="64">
+          <button class="machine__run" type="button" data-mrun>Run</button>
+        </div>
+
+        <div class="machine__meter" aria-hidden="true"><span data-mbar></span></div>
+
+        <div class="machine__slot">
+          <div class="machine__slip">
+            <p class="machine__slip-label">Answer</p>
+            <p class="machine__answer" data-ma role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 </main>
 
@@ -129,5 +167,6 @@
 <script src="js/header.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/search.js"></script>
+<script src="js/machine.js"></script>
 </body>
 </html>
