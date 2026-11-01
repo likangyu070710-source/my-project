@@ -375,15 +375,23 @@
   }
 
   function showError() {
+    /* Two different failures, two different sentences. Opened as a file the
+       reader can fix it in one step; a network failure they cannot. Telling
+       a file:// reader to "check the connection" would be useless, and
+       telling an online reader to "run a local server" would be wrong. */
+    var asFile = window.location.protocol === "file:";
+
     meta.textContent = "";
     empty.hidden = false;
 
     var strong = document.createElement("strong");
-    strong.textContent = "Search is unavailable";
+    strong.textContent = asFile ? "Search needs a web address" : "Search is unavailable";
     empty.appendChild(strong);
 
     var span = document.createElement("span");
-    span.textContent = "The four page files could not be read. The navigation above still works.";
+    span.textContent = asFile
+      ? "This page was opened as a file, so the other three cannot be read. Open the site over http — its web address, or a local server."
+      : "The four page files could not be read. The navigation above still works.";
     empty.appendChild(span);
 
     var btn = document.createElement("button");
