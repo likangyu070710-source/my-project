@@ -66,7 +66,7 @@
      table of contents, filter controls, photo credits, the fine print. */
   function cleanCopy(node) {
     var clone = node.cloneNode(true);
-    var drop = clone.querySelectorAll("nav, aside.toc, footer, .skip, .filters, .filter-status, .credit, .fineprint, .machine, script, style");
+    var drop = clone.querySelectorAll("nav, aside.toc, footer, .skip, .filters, .filter-status, .credit, .fineprint, .machine, .gallery, script, style");
     for (var i = 0; i < drop.length; i += 1) {
       if (drop[i].parentNode) { drop[i].parentNode.removeChild(drop[i]); }
     }
