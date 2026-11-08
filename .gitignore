@@ -21,3 +21,6 @@ $RECYCLE.BIN/
 .token
 *.pem
 *.key
+
+# ---- 提交材料截图 ----
+shots/
